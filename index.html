@@ -642,6 +642,17 @@
   .signoff .name{ font-family: 'Fraunces', serif; font-style: italic; font-size: 1.15rem; }
   .signoff .role{ font-size: 0.82rem; color: var(--text-muted); }
   .foot-legal{ margin-top: 26px; font-size: 0.78rem; color: var(--text-muted); max-width: 60ch; }
+  .site-stats{
+    display: none;
+    gap: 20px;
+    margin-top: 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+  .site-stats.is-ready{ display: flex; }
+  .site-stats span{ display: inline-flex; align-items: center; gap: 6px; }
+  .site-stats strong{ color: var(--accent-cool); font-weight: 600; }
 
   @media (prefers-reduced-motion: reduce){
     .pay-chip{ transition: none; }
@@ -692,9 +703,9 @@
 
     <div class="chi-sono-grid">
       <div class="chi-sono-testo">
-        <p>Ho sempre amato la tecnologia — videogiochi, fumetti, cartoni animati. Ho studiato grafica 3D da solo, poi in uno studio a Milano. Da giovane ho aperto un'agenzia di comunicazione: è chiusa anche perché il nostro cliente più grande, a un certo punto, ha smesso di pagarci — ci ha lasciati a piedi. Sono tornato a lavorare in uno studio di grafica, poi con mio fratello — siamo molto affiatati — ne abbiamo aperta un'altra. I clienti che non pagano in tempo erano diventati una costante del nostro settore in Italia, così ci siamo buttati nella vendita di birra artigianale: Ubeer. Un'esperienza fantastica, chiusa dopo circa dieci anni con la nuova crisi e le restrizioni del periodo Covid — non abbiamo più venduto nulla.</p>
+        <p>Ho sempre amato la tecnologia — videogiochi, fumetti, cartoni animati. Ho studiato grafica 3D da solo, poi in uno studio a Milano. Da giovane ho aperto un'agenzia di comunicazione: è chiusa anche perché il nostro cliente più grande, a un certo punto, ha smesso di pagarci — ci ha lasciati a piedi. Sono tornato a lavorare in uno studio di grafica, poi con mio fratello — siamo molto affiatati — ne abbiamo aperta un'altra insieme, poi ci siamo buttati in un progetto diverso: la vendita di birra artigianale, Ubeer, un'esperienza fantastica durata circa dieci anni.</p>
 
-        <p>Dopo, un'esperienza in cucina. Mi ha cambiato: mi piaceva lavorarci, ma alcuni problemi fisici mi hanno fatto capire cosa volevo fare davvero — costruire progetti per aiutare gli altri, e il mondo.</p>
+        <p>Poi, un'esperienza in cucina. Mi ha cambiato: mi piaceva lavorarci, ma alcuni problemi fisici mi hanno fatto capire una cosa più importante — che la mia vera passione, quella per la tecnologia e l'informatica, non se n'era mai andata. È quella che ha prevalso, e che mi ha riportato a costruire: progetti per aiutare gli altri, e il mondo.</p>
 
         <p>Mi sono appassionato alle intelligenze artificiali, le ho studiate, ci ho lavorato. Tra un'idea e l'altra è nata AVA — doveva essere solo una chat per un altro progetto. Poi ho pensato a quanto sarebbe bello avere una compagna di lavoro digitale, che fa tutto con te e per te.</p>
 
@@ -950,6 +961,10 @@
       <span class="role">Sto costruendo AVA da solo. Grazie per essere arrivato fin qui.</span>
     </div>
     <p class="foot-legal">Questa è una pagina personale, non legata a un'azienda registrata. Le donazioni sono libere e volontarie, tramite il metodo di pagamento scelto (Satispay o PayPal).</p>
+    <div class="site-stats" id="siteStats">
+      <span>👁 <strong id="statVisite">—</strong> visite</span>
+      <span>🔗 <strong id="statCondivisioni">—</strong> condivisioni</span>
+    </div>
   </div>
 </footer>
 
@@ -1086,7 +1101,7 @@
   var shareData = {
     title: 'Sostieni AVA',
     text: 'Sto costruendo AVA, una presenza digitale con memoria e personalità. Dai un\'occhiata:',
-    url: 'https://claude.ai/code/artifact/429b01cb-032a-410b-8b74-0dd95b0bc65e'
+    url: 'https://agostinozara-dev.github.io/Ava-Online/'
   };
 
   function fallbackCopy(text){
@@ -1119,15 +1134,19 @@
     }
     btn.addEventListener('click', function(){
       if(navigator.share){
-        navigator.share(shareData).catch(function(err){
+        navigator.share(shareData).then(function(){
+          if(window.__registraCondivisione) window.__registraCondivisione();
+        }).catch(function(err){
           if(err && err.name === 'AbortError') return;
           copyLink();
           showCopied();
+          if(window.__registraCondivisione) window.__registraCondivisione();
         });
         return;
       }
       copyLink();
       showCopied();
+      if(window.__registraCondivisione) window.__registraCondivisione();
     });
   }
 
@@ -1173,6 +1192,40 @@
       list.appendChild(row);
     });
   }
+})();
+
+(function(){
+  // Contatore visite/condivisioni — servizio esterno gratuito (Abacus), nessuna chiave richiesta.
+  // Funziona solo sul sito vero (GitHub Pages): dentro l'anteprima Artifact di Claude la rete
+  // esterna è bloccata per sicurezza, quindi qui fallisce in silenzio ed il riquadro resta nascosto.
+  var BASE = 'https://abacus.jasoncameron.dev';
+  var NS = 'agostinozara-ava-online';
+
+  function setStat(id, value){
+    var el = document.getElementById(id);
+    if(el) el.textContent = Number(value || 0).toLocaleString('it-IT');
+  }
+  function showStats(){
+    var box = document.getElementById('siteStats');
+    if(box) box.classList.add('is-ready');
+  }
+
+  fetch(BASE + '/hit/' + NS + '/visite')
+    .then(function(r){ return r.json(); })
+    .then(function(data){ setStat('statVisite', data.value); showStats(); })
+    .catch(function(){});
+
+  fetch(BASE + '/get/' + NS + '/condivisioni')
+    .then(function(r){ return r.json(); })
+    .then(function(data){ setStat('statCondivisioni', data.value); showStats(); })
+    .catch(function(){});
+
+  window.__registraCondivisione = function(){
+    fetch(BASE + '/hit/' + NS + '/condivisioni')
+      .then(function(r){ return r.json(); })
+      .then(function(data){ setStat('statCondivisioni', data.value); })
+      .catch(function(){});
+  };
 })();
 </script>
 
