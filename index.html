@@ -194,13 +194,25 @@
   /* ---------- GUIDA PAGAMENTI ---------- */
   .guida-grid{
     display: grid;
-    grid-template-columns: 0.8fr 1.2fr;
+    grid-template-columns: 1.3fr 0.9fr;
     gap: clamp(32px, 5vw, 64px);
     align-items: start;
   }
   @media (max-width: 780px){
     .guida-grid{ grid-template-columns: 1fr; }
   }
+  .guida-cta-col{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    position: sticky;
+    top: 32px;
+  }
+  @media (max-width: 780px){
+    .guida-cta-col{ position: static; }
+  }
+  .guida-cta-col .hero-actions{ display: flex; flex-direction: column; gap: 10px; }
   .guida-col h3{
     font-size: 1.2rem;
     font-weight: 550;
@@ -346,10 +358,8 @@
     bottom: 0; left: 0; width: 100%;
     height: 0%;
     background-image: linear-gradient(to top,
-      #E5484D 0%,
-      #F5A524 25%,
-      #30C48D 75%,
-      #5FD3EC 75%,
+      #F5A524 0%,
+      #30C48D 60%,
       #5FD3EC 100%
     );
     background-size: 100% 420px;
@@ -357,6 +367,15 @@
     background-repeat: no-repeat;
     transition: height 1.1s cubic-bezier(.16,1,.3,1);
     border-radius: 0 0 32px 32px;
+  }
+  .termometro-fill::after{
+    content: '';
+    position: absolute;
+    top: 0; left: -1px; right: -1px;
+    height: 4px;
+    background: #fff;
+    border-radius: 999px;
+    box-shadow: 0 0 14px 3px var(--accent-cool), 0 0 3px 1px #fff;
   }
   .termometro-goal-line{
     position: absolute;
@@ -385,9 +404,18 @@
   }
   .ringraziamenti-list{
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 10px;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
   }
+  .ringraziamenti-list::-webkit-scrollbar{ height: 6px; }
+  .ringraziamenti-list::-webkit-scrollbar-track{ background: transparent; }
+  .ringraziamenti-list::-webkit-scrollbar-thumb{ background: var(--border); border-radius: 999px; }
+  .ringraziamenti-list::-webkit-scrollbar-thumb:hover{ background: var(--accent-cool); }
   .ringraziamento-item{
     display: inline-flex;
     align-items: center;
@@ -397,6 +425,8 @@
     border-radius: 999px;
     padding: 9px 16px 9px 14px;
     font-size: 0.92rem;
+    flex: none;
+    white-space: nowrap;
   }
   .ringraziamento-item .rg-amount{
     color: var(--accent-cool);
@@ -442,7 +472,6 @@
   }
   .section-head h2{ font-size: clamp(1.9rem, 3.6vw, 2.5rem); font-weight: 500; }
   .section-head .dek{ color: var(--text-muted); font-size: 1.02rem; max-width: 54ch; }
-
   .about-grid{
     display: grid;
     gap: 28px;
@@ -703,6 +732,22 @@
   .site-stats span{ display: inline-flex; align-items: center; gap: 6px; }
   .site-stats strong{ color: var(--accent-cool); font-weight: 600; }
 
+  .social-row{ display: flex; gap: 10px; margin-top: 20px; }
+  .social-icon{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    transition: border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+  }
+  .social-icon svg{ width: 17px; height: 17px; }
+  .social-icon:hover{ border-color: var(--accent-cool); color: var(--accent-cool); transform: translateY(-2px); }
+  .social-icon:focus-visible{ outline: 3px solid var(--accent-cool); outline-offset: 3px; }
+
   @media (prefers-reduced-motion: reduce){
     .pay-chip{ transition: none; }
   }
@@ -732,13 +777,11 @@
     </div>
 
     <div class="guida-grid">
-      <div class="guida-col">
+      <div class="guida-col guida-testo">
         <h3><span class="dot-sati"></span>Satispay</h3>
         <p>Se hai già l'app, il link apre direttamente la richiesta di donazione dentro Satispay. Se non ce l'hai, la stessa pagina ti guida a scaricarla — bastano un paio di minuti anche alla prima volta, poi il pagamento è immediato.</p>
-      </div>
 
-      <div class="guida-col">
-        <h3><span class="dot-pp"></span>PayPal</h3>
+        <h3 style="margin-top:28px;"><span class="dot-pp"></span>PayPal</h3>
         <p style="margin-bottom:18px;">Il pulsante ti porta a questa pagina: il numero grande che vedi è <strong>il totale raccolto finora</strong>, non il tuo importo — è normale che sia diverso da zero solo quando arrivano donazioni vere. Clicca il pulsante <strong>"Donazione"</strong> per andare avanti.</p>
         <div class="guida-steps">
           <div class="guida-step">
@@ -751,27 +794,30 @@
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="stat-panel" style="margin-top:44px;">
-      <span class="stat-value mono" id="statValue">€0</span>
-      <span class="stat-label">
-        <span class="t1">raccolti finora</span>
-        <span class="t2 mono" id="statDate">aggiornato il 25/08/2026</span>
-      </span>
-    </div>
+      <div class="guida-col guida-cta-col">
+        <div class="stat-panel">
+          <span class="stat-value mono" id="statValue">€0</span>
+          <span class="stat-label">
+            <span class="t1">raccolti finora</span>
+            <span class="t2 mono" id="statDate">aggiornato il 25/08/2026</span>
+          </span>
+        </div>
 
-    <div class="hero-actions" style="margin-top:26px;">
-      <div class="pay-row">
-        <a class="pay-chip pay-satispay" href="https://web.satispay.com/download/qrcode/S6Y-SVN--7AB16682-CA5E-4E19-AE26-DDB3EEF6FD3A?locale=it" id="donateSatispay" target="_blank" rel="noopener">Satispay</a>
-        <a class="pay-chip pay-paypal" href="https://www.paypal.com/pools/c/9s6HBITEDc" id="donatePaypal" target="_blank" rel="noopener"><span>Pay</span><span class="pal">Pal</span></a>
-        <button class="btn-share" id="shareBtn" type="button">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.5" x2="15.4" y2="6.5"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/></svg>
-          <span class="share-label">Condividi</span>
-        </button>
+        <div class="hero-actions">
+          <div class="pay-row">
+            <a class="pay-chip pay-satispay" href="https://web.satispay.com/download/qrcode/S6Y-SVN--7AB16682-CA5E-4E19-AE26-DDB3EEF6FD3A?locale=it" id="donateSatispay" target="_blank" rel="noopener">Satispay</a>
+            <a class="pay-chip pay-paypal" href="https://www.paypal.com/pools/c/9s6HBITEDc" id="donatePaypal" target="_blank" rel="noopener"><span>Pay</span><span class="pal">Pal</span></a>
+            <button class="btn-share" id="shareBtn" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.5" x2="15.4" y2="6.5"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/></svg>
+              <span class="share-label">Condividi</span>
+            </button>
+          </div>
+          <span class="pay-note">Satispay e PayPal sono attivi — scegli quello che preferisci.</span>
+        </div>
       </div>
-      <span class="pay-note">Satispay e PayPal sono attivi — scegli quello che preferisci.</span>
     </div>
+
   </div>
 </section>
 
@@ -1043,6 +1089,12 @@
       <span class="name">— Agostino</span>
       <span class="role">Sto costruendo AVA da solo. Grazie per essere arrivato fin qui.</span>
     </div>
+    <div class="social-row">
+      <a class="social-icon" href="https://x.com/AgostinoGJZ" target="_blank" rel="noopener" aria-label="X"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg></a>
+      <a class="social-icon" href="https://www.facebook.com/agostino.zara.3" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 4.4 4.4 0 0 0-.554-.005c-.591 0-1.08.076-1.489.229a2.223 2.223 0 0 0-1.279 1.334c-.15.451-.226 1.05-.226 1.798v1.582h4.19l-.582 3.667h-3.608v7.99H9.101z"/></svg></a>
+      <a class="social-icon" href="https://www.instagram.com/ava_oneforall/" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C8.74 0 8.333.014 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.014 8.333 0 8.74 0 12s.014 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.986 8.74 24 12 24s3.667-.014 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.014-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.014 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.9 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.9-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg></a>
+      <a class="social-icon" href="https://www.tiktok.com/@ava.project4" target="_blank" rel="noopener" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg></a>
+    </div>
     <p class="foot-legal">Questa è una pagina personale, non legata a un'azienda registrata. Le donazioni sono libere e volontarie, tramite il metodo di pagamento scelto (Satispay o PayPal).</p>
     <div class="site-stats" id="siteStats">
       <span>👁 <strong id="statVisite">—</strong> visite</span>
@@ -1242,20 +1294,25 @@
   // { amount: 25, name: "Nome" }  — importo in euro, nome come va mostrato pubblicamente
   var SOSTENITORI = [
     // esempio: { amount: 25, name: "Davide" },
+    { amount: 20 },
+    { amount: 1.50 },
+    { amount: 0.62 },
+    { amount: 10 },
   ];
   var OBIETTIVO_TOP = 24000; // 12 mesi — cima del termometro
-  var OGGI = '28/08/2026';
+  var OGGI = '05/09/2026';
 
-  var totale = SOSTENITORI.reduce(function(sum, d){ return sum + (d.amount || 0); }, 0);
+  var totale = Math.round(SOSTENITORI.reduce(function(sum, d){ return sum + (d.amount || 0); }, 0) * 100) / 100;
 
   var statValue = document.getElementById('statValue');
-  if(statValue) statValue.textContent = '€' + totale.toLocaleString('it-IT');
+  if(statValue) statValue.textContent = '€' + totale.toLocaleString('it-IT', {minimumFractionDigits: 2, maximumFractionDigits: 2});
   var statDate = document.getElementById('statDate');
   if(statDate) statDate.textContent = 'aggiornato il ' + OGGI;
 
   var fill = document.getElementById('termometroFill');
   if(fill){
-    var pct = Math.max(0, Math.min(100, (totale / OBIETTIVO_TOP) * 100));
+    var pctReale = (totale / OBIETTIVO_TOP) * 100;
+    var pct = totale > 0 ? Math.max(3, Math.min(100, pctReale)) : 0; // minimo visibile, la cifra esatta resta in statValue
     requestAnimationFrame(function(){ fill.style.height = pct + '%'; });
   }
 
@@ -1265,15 +1322,18 @@
     SOSTENITORI.slice().reverse().forEach(function(d){
       var row = document.createElement('div');
       row.className = 'ringraziamento-item';
-      var nameSpan = document.createElement('span');
-      nameSpan.textContent = d.name || 'Anonimo';
+      if(d.name){
+        var nameSpan = document.createElement('span');
+        nameSpan.textContent = d.name;
+        row.appendChild(nameSpan);
+      }
       var amtSpan = document.createElement('span');
       amtSpan.className = 'rg-amount mono';
-      amtSpan.textContent = '€' + d.amount;
-      row.appendChild(nameSpan);
+      amtSpan.textContent = '€' + (d.amount || 0).toLocaleString('it-IT', {minimumFractionDigits: 2, maximumFractionDigits: 2});
       row.appendChild(amtSpan);
       list.appendChild(row);
     });
+    list.scrollLeft = 0; // l'ultima donazione è sempre la prima della lista (reverse) e resta visibile
   }
 })();
 
